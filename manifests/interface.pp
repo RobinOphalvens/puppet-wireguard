@@ -33,6 +33,7 @@ define wireguard::interface (
   Enum['present','absent']        $ensure   = 'present',
   Optional[Variant[Array,String]] $address  = undef,
   Optional[Integer[1,9202]]       $mtu      = undef,
+  Optional[Enum['on','off']]      $table    = undef,
   Optional[Variant[Array,String]] $preup    = undef,
   Optional[Variant[Array,String]] $postup   = undef,
   Optional[Variant[Array,String]] $predown  = undef,
