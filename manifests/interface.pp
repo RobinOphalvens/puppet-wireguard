@@ -53,19 +53,31 @@ define wireguard::interface (
   Stdlib::Absolutepath  $config_dir   = '/etc/wireguard',
 ) {
 
-  file {"${config_dir}/${name}.conf":
-    ensure    => $ensure,
-    mode      => '0600',
-    owner     => 'root',
-    group     => 'root',
-    content   => template("${module_name}/interface.conf.erb"),
-    notify    => Exec["wg-quick-${name}"],
-  }
-
-  Exec {"wg-quick-${name}":
-   command => "/usr/bin/wg-quick up ${name}"
-   refresh => "/bin/bash -c 'exec /usr/bin/wg syncconf ${name} <(exec /usr/bin/wg-quick strip ${name})"
-   unless  => "wg | grep ${name}"
-   require => File["${config_dir}/${name}.conf"],
+  case $ensure {
+    default, 'present': {
+      file {"${config_dir}/${name}.conf":
+        ensure    => present,
+        mode      => '0600',
+        owner     => 'root',
+        group     => 'root',
+        content   => template("${module_name}/interface.conf.erb"),
+        notify    => Exec["wg-quick-${name}"],
+      }
+      Exec {"wg-quick-${name}":
+       command => "/usr/bin/wg-quick up ${name}",
+       refresh => "/bin/bash -c 'exec /usr/bin/wg syncconf ${name} <(exec /usr/bin/wg-quick strip ${name})",
+       unless  => "wg | grep ${name}",
+       require => File["${config_dir}/${name}.conf"],
+      }
+    }
+    'absent': {
+      Exec {"wg-quick down ${name}":
+        command => "/usr/bin/wg-quick down ${name}",
+        unless  => "/bin/test ! -f ${config_dir}/${name}.conf",
+      }
+      file {"${config_dir}/${name}.conf":
+        ensure    => absent,
+      }
+    }
   }
 }
