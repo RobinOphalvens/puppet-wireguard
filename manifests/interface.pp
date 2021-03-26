@@ -49,7 +49,7 @@ define wireguard::interface (
     }
   ]]]                   $peers        = [],
   Optional[String]      $dns          = undef,
-  Boolean               $saveconfig   = true,
+  Boolean               $saveconfig   = false,
   Stdlib::Absolutepath  $config_dir   = '/etc/wireguard',
 ) {
 
@@ -58,24 +58,14 @@ define wireguard::interface (
     mode      => '0600',
     owner     => 'root',
     group     => 'root',
-    show_diff => false,
     content   => template("${module_name}/interface.conf.erb"),
-    notify    => Service["wg-quick@${name}.service"],
+    notify    => Exec["wg-quick-${name}"],
   }
 
-  $_service_ensure = $ensure ? {
-    'absent' => 'stopped',
-    default  => 'running',
-  }
-  $_service_enable = $ensure ? {
-    'absent' => false,
-    default  => true,
-  }
-
-  service {"wg-quick@${name}.service":
-    ensure   => $_service_ensure,
-    provider => 'systemd',
-    enable   => $_service_enable,
-    require  => File["${config_dir}/${name}.conf"],
+  Exec {"wg-quick-${name}":
+   command => "/usr/bin/wg-quick up ${name}"
+   refresh => "/bin/bash -c 'exec /usr/bin/wg syncconf ${name} <(exec /usr/bin/wg-quick strip ${name})"
+   unless  => "wg | grep ${name}"
+   require => File["${config_dir}/${name}.conf"],
   }
 }
