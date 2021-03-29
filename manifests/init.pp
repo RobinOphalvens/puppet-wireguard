@@ -27,7 +27,6 @@ class wireguard (
   Variant[Boolean, Enum['installed','latest','present']] $package_ensure = 'installed',
   Stdlib::Absolutepath   $config_dir       = $wireguard::params::config_dir,
   String                 $config_dir_mode  = $wireguard::params::config_dir_mode,
-  Boolean                $config_dir_purge = $wireguard::params::config_dir_purge,
   Optional[Hash]         $interfaces       = {},
 ) inherits wireguard::params {
 

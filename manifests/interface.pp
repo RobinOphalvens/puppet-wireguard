@@ -74,7 +74,7 @@ define wireguard::interface (
       Exec {"wg-quick down ${name}":
         command => "/usr/bin/wg-quick down ${name}",
         unless  => "/bin/test ! -f ${config_dir}/${name}.conf",
-      }
+      } ~>
       file {"${config_dir}/${name}.conf":
         ensure    => absent,
       }
