@@ -40,7 +40,6 @@ class wireguard (
   -> class { 'wireguard::config':
     config_dir       => $config_dir,
     config_dir_mode  => $config_dir_mode,
-    config_dir_purge => $config_dir_purge,
   }
   -> Class[wireguard]
 
