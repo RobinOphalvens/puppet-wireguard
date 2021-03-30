@@ -65,7 +65,7 @@ define wireguard::interface (
       }
       Exec {"wg-quick-${name}":
        command => "/usr/bin/wg-quick up ${name}",
-       refresh => "/bin/bash -c 'exec /usr/bin/wg syncconf ${name} <(exec /usr/bin/wg-quick strip ${name})",
+       refresh => "/bin/bash -c exec /usr/bin/wg syncconf ${name} <(exec /usr/bin/wg-quick strip ${name})",
        unless  => "/usr/bin/wg | grep ${name}",
        require => File["${config_dir}/${name}.conf"],
       }
